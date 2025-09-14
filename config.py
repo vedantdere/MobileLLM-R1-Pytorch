@@ -44,40 +44,80 @@ class PretrainedConfig:
         self.tie_encoder_decoder=tie_encoder_decoder
 
 
-class GEMMA3_270M(PretrainedConfig):
+class MobileLLM_R1_360M(PretrainedConfig):
     def __init__(self):
         self.attention_bias = False
         self.attention_dropout = 0.0
         self.attn_logit_softcapping = None
-        self.bos_token_id = 2
-        self.eos_token_id = 1
+        self.bos_token_id = 128000
+        self.eos_token_id = [
+            128001,
+            128008,
+            128009
+        ]
+        self.attn_scale = 0.1
+        self.attention_chunk_size = 32768
+        self.attn_temperature_tuning = False
         self.final_logit_softcapping = None
-        self.head_dim = 256
+        self.floor_scale = 8192
+        self.for_llm_compressor = False
+        self.head_dim = 64
         self.hidden_activation = "silu"
-        self.hidden_size = 256
-        self.num_hidden_layers = 18
-        self.intermediate_size = 2048
+        self.hidden_size = 1024
+        self.initializer_range = 0.02
+        self.interleave_moe_layer_step = 0
+        self.num_hidden_layers = 15
+        self.intermediate_size = 4096
+        self.intermediate_size_mlp = 4096
         self.layer_types = [
             "sliding_attention" if bool((i+1)%2) else "full_attention" for i in range(self.num_hidden_layers)
         ]
 
         self.max_position_embeddings = 32768
-        self.model_type = "gemma3_270m"
-        self.num_attention_heads = 4
-        self.num_key_value_heads = 1
+        self.model_type = "llama4_text"
+        self.moe_layers = []
+        self.no_rope_layers = [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+        ]
+        self.num_attention_heads = 16
+        self.num_experts_per_tok = 0
+        self.num_key_value_heads = 4
+        self.num_local_experts = 0
+        self.output_router_logits = False
         self.pad_token_id = 0
         self.query_pre_attn_scalar = 256
-        self.rms_norm_eps = 1e-6
+        self.rms_norm_eps = 1e-05
         self.rope_local_base_freq = 10000.0
-        self.rope_scaling={
-            "rope_type":"yarn",
-            "factor":32.0,
-            "beta_fast":32.0,
-            "beta_slow":1.0,
-            "truncate":False
-        }
-        self.rope_theta = 1000000.0
+        self.rope_scaling=None
+        self.rope_theta = 8000000.0
+        self.router_aux_loss_coef = 0.001
+        self.router_jitter_noise = 0.0
+        self.tie_word_embeddings = True
         self.sliding_window = 512
         self.use_cache = False
         self.output_hidden_states = None
-        self.vocab_size = 262144
+        self.vocab_size = 128256
+        torch_dtype = "float32"
+        use_cache = True
+        use_qk_norm = True
