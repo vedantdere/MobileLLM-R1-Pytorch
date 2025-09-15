@@ -118,6 +118,6 @@ class MobileLLM_R1_360M(PretrainedConfig):
         self.use_cache = False
         self.output_hidden_states = None
         self.vocab_size = 128256
-        torch_dtype = "float32"
-        use_cache = True
-        use_qk_norm = True
+        self.torch_dtype = "float32"
+        self.use_cache = True
+        self.use_qk_norm = True
