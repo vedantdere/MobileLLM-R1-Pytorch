@@ -412,7 +412,7 @@ class Llama4TextModel(Llama4PreTrainedModel):
         self.gradient_checkpointing = False
 
         # Initialize weights and apply final processing
-        self.post_init()
+        # self.post_init()
 
     
     def forward(
@@ -484,7 +484,7 @@ class Llama4ForCausalLM(nn.Module):
         self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
 
         # Initialize weights and apply final processing
-        self.post_init()
+        # self.post_init()
 
 
     def forward(
