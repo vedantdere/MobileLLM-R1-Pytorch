@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS
-from attn_implementation import eager_paged_attention_forward
+from attn_implementation import eager_attention_forward
 from transformers.modeling_outputs import BaseModelOutputWithPast
 from transformers.masking_utils import create_causal_mask, create_chunked_causal_mask
 
@@ -300,7 +300,7 @@ class Llama4TextAttention(nn.Module):
 
         attention_interface: Callable = eager_attention_forward
         # if self.config._attn_implementation != "eager":
-        attention_interface = eager_paged_attention_forward
+        attention_interface = eager_attention_forward
         attn_output, attn_weights = attention_interface(
             self,
             query_states,
