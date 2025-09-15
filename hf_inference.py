@@ -139,7 +139,12 @@ def _apply_hf_config_to_local(base: MobileLLM_R1_360M, cfg: dict) -> MobileLLM_R
 def _build_causal_mask(input_ids: torch.Tensor, dtype: torch.dtype) -> torch.Tensor:
     bsz, seq_len = input_ids.shape
     # [1, 1, S, S] broadcastable across batch and heads
-    mask = torch.full((1, 1, seq_len, seq_len), fill_value=torch.finfo(dtype).min, dtype=dtype, device=input_ids.device)
+    mask = torch.full(
+        (1, 1, seq_len, seq_len),
+        fill_value=torch.finfo(dtype).min,
+        dtype=dtype,
+        device=input_ids.device,
+    )
     mask = torch.triu(mask, diagonal=1)
     return mask
 
@@ -148,6 +153,7 @@ def load_mobilellm(
     model_path: str,
     device: str = "cpu",
     dtype: Optional[str] = None,
+    strict: bool = False,
 ) -> Tuple[Llama4ForCausalLM, Optional[object]]:
     """Load model weights from a HF directory and return (model, tokenizer).
 
@@ -198,7 +204,7 @@ def load_mobilellm(
             pass
 
     # Load weights; allow missing/extra keys to tolerate minor naming diffs
-    missing, unexpected = model.load_state_dict(state, strict=False)
+    missing, unexpected = model.load_state_dict(state, strict=strict)
     if missing:
         print(f"[warn] Missing {len(missing)} keys (showing first 10): {missing[:10]}")
     if unexpected:
@@ -228,7 +234,8 @@ def generate_step(
 
     # causal mask and positions
     cache_position = torch.arange(input_ids.shape[1], device=device)
-    attn_mask = _build_causal_mask(input_ids, dtype=torch.float32)
+    model_dtype = next(model.parameters()).dtype
+    attn_mask = _build_causal_mask(input_ids, dtype=model_dtype)
 
     logits = model(
         input_ids=input_ids,
@@ -263,11 +270,23 @@ def generate_text(
     if tokenizer is None:
         raise ValueError("Tokenizer not available. Provide a tokenizer or use token-id based generation.")
 
-    input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(next(model.parameters()).device)
+    device = next(model.parameters()).device
+    input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
+
+    # Collect EOS ids (may be int or list)
+    eos_ids = getattr(model.model.config, "eos_token_id", None)
+    if isinstance(eos_ids, int):
+        eos_set = {eos_ids}
+    elif isinstance(eos_ids, (list, tuple)):
+        eos_set = set(int(x) for x in eos_ids)
+    else:
+        eos_set = set()
 
     for _ in range(max_new_tokens):
         next_token = generate_step(model, input_ids, temperature=temperature, top_k=top_k)
         input_ids = torch.cat([input_ids, next_token[:, None]], dim=1)
+        if eos_set and int(next_token[0].item()) in eos_set:
+            break
 
     return tokenizer.decode(input_ids[0], skip_special_tokens=True)
 
@@ -281,8 +300,9 @@ def main():
     parser.add_argument("--max-new-tokens", type=int, default=64)
     parser.add_argument("--device", default="cpu", help="cpu or cuda")
     parser.add_argument("--dtype", default=None, help="float32|float16|bfloat16 (optional)")
-    parser.add_argument("--temperature", type=float, default=1.0)
+    parser.add_argument("--temperature", type=float, default=0.7)
     parser.add_argument("--top-k", type=int, default=None)
+    parser.add_argument("--strict-load", action="store_true", help="Require exact state_dict key match")
     parser.add_argument("--revision", default=None, help="Optional branch/tag/commit for --model-id")
     parser.add_argument(
         "--local-files-only",
@@ -314,7 +334,7 @@ def main():
             allow_patterns=allow,
         )
 
-    model, tokenizer = load_mobilellm(model_path, device=args.device, dtype=args.dtype)
+    model, tokenizer = load_mobilellm(model_path, device=args.device, dtype=args.dtype, strict=args.strict_load)
 
     if tokenizer is None:
         raise SystemExit(
