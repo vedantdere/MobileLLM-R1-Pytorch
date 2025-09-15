@@ -399,7 +399,7 @@ class Llama4PreTrainedModel(nn.Module):
 class Llama4TextModel(Llama4PreTrainedModel):
 
     def __init__(self, config):
-        super().__init__(config)
+        super().__init__()
         self.padding_idx = config.pad_token_id
         self.vocab_size = config.vocab_size
 
@@ -478,7 +478,7 @@ class Llama4TextModel(Llama4PreTrainedModel):
 class Llama4ForCausalLM(nn.Module):
 
     def __init__(self, config):
-        super().__init__(config)
+        super().__init__()
         self.model = Llama4TextModel(config)
         self.vocab_size = config.vocab_size
         self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
