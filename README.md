@@ -4,26 +4,25 @@
 
 Beginner friendly: if you know `nn.Module`, you’re good. This repo shows a clean PyTorch implementation of a MobileLLM-style decoder and a tiny Hugging Face loader so you can run real checkpoints with minimal code.
 
-What’s Inside
+## What’s Inside ✨
 - Plain PyTorch modules in `layers.py` and `attn_implementation.py`
 - A simple config in `config.py` (no magic)
 - HF-compatible loader + CLI in `hf_inference.py`
-- A tiny smoke test in `test_hf_inference.py`
 
-Install (git+)
+## Install (git+) 📦
 - Python 3.9+ and a working PyTorch install.
 - Replace the URL with your repo:
 
 ```bash
-pip install "git+https://github.com/vedantdere/MobileLLM-R1-Pytorch.git#egg=mobilellm-hf"
+pip install "git+https://github.com/vedantdere/MobileLLM-R1-Pytorch.git"
 ```
 
-Run It (CLI)
+## Run It (CLI) 🚀
 - From the Hugging Face Hub:
 
 ```bash
 mobilellm-hf-infer \
-  --model-id org/model \
+  --model-id facebook/MobileLLM-R1-360M \
   --prompt "Hello, MobileLLM!" \
   --max-new-tokens 64 \
   --device cpu
@@ -38,7 +37,7 @@ mobilellm-hf-infer \
   --device cuda
 ```
 
-Useful Flags
+## Useful Flags 🧰
 
 ```text
 --dtype float32|float16|bfloat16
@@ -49,7 +48,7 @@ Useful Flags
 --top-k 40                          # sample from top-k tokens
 ```
 
-Python in 10 Lines
+## MobileLLM in 10 Lines 🐍
 
 ```python
 from hf_inference import load_mobilellm, generate_text
@@ -58,7 +57,7 @@ model, tokenizer = load_mobilellm("/path/to/hf_dir", device="cuda", dtype="bfloa
 print(generate_text(model, tokenizer, "What is 2+2?", max_new_tokens=32))
 ```
 
-If You’re Curious (but still simple)
+## If You’re Curious (but still simple) 🔍
 - Core blocks are standard `nn.Module`s:
 
 ```python
@@ -78,36 +77,21 @@ class Llama4ForCausalLM(nn.Module):
         return self.lm_head(hidden)
 ```
 
-Bring Your Own Weights
-- Put HF-style files in a folder: `config.json`, `model.safetensors` or `pytorch_model*.bin`, plus tokenizer files.
-- Then run:
 
-```bash
-mobilellm-hf-infer --model-path /path/to/hf_dir --prompt "Hi" --temperature 0
-```
 
-Smoke Test
-
-```bash
-# Hub
-mobilellm-hf-test --model-id org/model --prompt "Write a haiku about code" --max-new-tokens 24
-
-# Local
-mobilellm-hf-test --model-path /path/to/hf_dir --device cpu
-```
-
-Tips
+## Tips 💡
 - Prefer `bfloat16` on modern GPUs, `float32` on CPU.
 - Use `--temperature 0` for reproducible outputs.
 - Loader ties `lm_head` to embeddings when `tie_word_embeddings` is enabled.
 
-Troubleshooting
+## Troubleshooting 🛠️
 - Outputs ignore the prompt? Try `--strict-load` and ensure tokenizer files match the checkpoint.
 - Private/gated models: `huggingface-cli login` or set `HF_TOKEN`.
 
-Entrypoints
+## Entrypoints 🏁
 - `mobilellm-hf-infer`: prompt-based generation (Hub or local)
-- `mobilellm-hf-test`: quick smoke test; falls back to token-IDs if needed
 
-License
-- Add your license text here.
+
+Special thanks to the Hugging Face Transformers team for their incredible open-source contributions, which continue to set the standard for accessibility and innovation in NLP. This reimplementation draws heavy inspiration from their integration but is re-imagined in a simpler, beginner-friendly way to make it easier for newcomers to understand.
+
+A huge appreciation also goes to Meta for their groundbreaking research and open-sourcing efforts, which have accelerated progress in large-scale language models and made cutting-edge technology available to the community.
