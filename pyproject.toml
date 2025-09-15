@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reimplementation-mobilellm-hf"
+version = "0.1.0"
+description = "Reimplementation of MobileLLM: Hugging Face loader + inference utilities"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "torch",
+  "transformers>=4.43",
+  "huggingface_hub>=0.23",
+]
+
+[project.optional-dependencies]
+extras = ["safetensors>=0.4"]
+dev = ["pytest", "ruff", "black"]
+
+[project.scripts]
+mobilellm-hf-infer = "hf_inference:main"
+mobilellm-hf-test = "test_hf_inference:main"
+
+[tool.setuptools]
+py-modules = [
+  "config",
+  "layers",
+  "attn_implementation",
+  "hf_inference",
+  "test_hf_inference",
+]
