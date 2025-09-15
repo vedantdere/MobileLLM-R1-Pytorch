@@ -435,21 +435,21 @@ class Llama4TextModel(Llama4PreTrainedModel):
         if position_ids is None:
             position_ids = cache_position.unsqueeze(0)
 
-        if not isinstance(causal_mask_mapping := attention_mask, dict):
-            # Prepare mask arguments
-            mask_kwargs = {
-                "config": self.config,
-                "input_embeds": inputs_embeds,
-                "attention_mask": attention_mask,
-                "cache_position": cache_position,
-                "past_key_values": past_key_values,
-                "position_ids": position_ids,
-            }
-            # Create the masks
-            causal_mask_mapping = {
-                "full_attention": create_causal_mask(**mask_kwargs),
-                "chunked_attention": create_chunked_causal_mask(**mask_kwargs),
-            }
+        # if not isinstance(causal_mask_mapping := attention_mask, dict):
+        #     # Prepare mask arguments
+        #     mask_kwargs = {
+        #         "config": self.config,
+        #         "input_embeds": inputs_embeds,
+        #         "attention_mask": attention_mask,
+        #         "cache_position": cache_position,
+        #         "past_key_values": past_key_values,
+        #         "position_ids": position_ids,
+        #     }
+        #     # Create the masks
+        #     causal_mask_mapping = {
+        #         "full_attention": create_causal_mask(**mask_kwargs),
+        #         "chunked_attention": create_chunked_causal_mask(**mask_kwargs),
+        #     }
 
         hidden_states = inputs_embeds
 
@@ -459,7 +459,7 @@ class Llama4TextModel(Llama4PreTrainedModel):
         for decoder_layer in self.layers[: self.config.num_hidden_layers]:
             hidden_states = decoder_layer(
                 hidden_states,
-                attention_mask=causal_mask_mapping[decoder_layer.attention_type],
+                attention_mask=attention_mask,
                 position_ids=position_ids,
                 past_key_values=past_key_values,
                 use_cache=use_cache,
