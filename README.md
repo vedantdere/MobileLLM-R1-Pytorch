@@ -1,4 +1,6 @@
-Pure 💧 Pytorch 🔥 Reimplementation of the MobileLLM-R1-Pytorch
+# Pure 💧 Pytorch 🔥 Reimplementation of the MobileLLM-R1-Pytorch
+
+![MobileLLM overview](assets/asset1.png)
 
 Beginner friendly: if you know `nn.Module`, you’re good. This repo shows a clean PyTorch implementation of a MobileLLM-style decoder and a tiny Hugging Face loader so you can run real checkpoints with minimal code.
 
@@ -13,7 +15,7 @@ Install (git+)
 - Replace the URL with your repo:
 
 ```bash
-pip install "git+https://github.com/your-org/your-repo.git#egg=mobilellm-hf"
+pip install "git+https://github.com/vedantdere/MobileLLM-R1-Pytorch.git#egg=mobilellm-hf"
 ```
 
 Run It (CLI)
